@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParkWise - Find a Parking Space</title>
+
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        body.dark-theme {
+            --bg-color: #16171d;
+            --text-color: #f3f4f6;
+            --subtext-color: #9ca3af;
+            --border-color: #2b2d35;
+            --panel-bg: #1e1f26;
+            --panel-shadow: rgba(0, 0, 0, 0.2);
+            --accent-color: #e06c75;
+        }
+
+        .page-content {
+            display: grid;
+            gap: 1.25rem;
+        }
+
+        .hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.75rem;
+            border-radius: 12px;
+            background:
+                radial-gradient(circle at 90% 10%, rgba(224,108,117,.18), transparent 35%),
+                var(--panel-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .eyebrow {
+            margin-bottom: .5rem;
+            color: var(--accent-color);
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+        }
+
+        .hero h1 {
+            margin-bottom: .55rem;
+            font-size: clamp(1.5rem, 3vw, 2.15rem);
+        }
+
+        .hero p {
+            margin-bottom: 0;
+            color: var(--subtext-color);
+            line-height: 1.6;
+        }
+
+        .site-badge {
+            flex: 0 0 auto;
+            padding: .65rem .9rem;
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            color: var(--subtext-color);
+            font-size: .75rem;
+            background: var(--bg-color);
+        }
+
+        .action-card {
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) auto;
+            align-items: end;
+            gap: 1rem;
+        }
+
+        .action-card label {
+            display: block;
+            margin-bottom: .5rem;
+            color: var(--subtext-color);
+            font-size: .8rem;
+        }
+
+        .action-card select {
+            width: 100%;
+            padding: .85rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 7px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font: inherit;
+        }
+
+        .primary-button {
+            min-height: 46px;
+            padding: .75rem 1.2rem;
+            border: 0;
+            border-radius: 7px;
+            background: var(--accent-color);
+            color: white;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform .15s ease, filter .15s ease;
+        }
+
+        .primary-button:hover {
+            filter: brightness(1.08);
+            transform: translateY(-1px);
+        }
+
+        .summary {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.1rem 1.25rem;
+            border: 1px solid rgba(16, 185, 129, .35);
+            border-radius: 10px;
+            background: rgba(16, 185, 129, .08);
+        }
+
+        .summary.no-match {
+            border-color: var(--border-color);
+            background: var(--panel-bg);
+        }
+
+        .summary-icon {
+            display: grid;
+            place-items: center;
+            width: 42px;
+            height: 42px;
+            flex: 0 0 42px;
+            border-radius: 50%;
+            background: #10b981;
+            color: #071b15;
+            font-size: 1.25rem;
+            font-weight: 800;
+        }
+
+        .summary.no-match .summary-icon {
+            background: var(--border-color);
+            color: var(--subtext-color);
+        }
+
+        .summary strong {
+            display: block;
+            margin-bottom: .2rem;
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        .summary span {
+            color: var(--subtext-color);
+            font-size: .8rem;
+        }
+
+        .section-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .section-heading h2 {
+            margin-bottom: 0;
+        }
+
+        .section-heading p {
+            margin: .35rem 0 0;
+            color: var(--subtext-color);
+            font-size: .8rem;
+        }
+
+        .lot-layout {
+            position: relative;
+            min-height: 340px;
+            overflow: hidden;
+            border: 1px solid #41464b;
+            border-radius: 10px;
+            background-color: #353a3f;
+            background-image:
+                linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+
+        .lot-label {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            z-index: 2;
+            padding: .5rem .7rem;
+            border-radius: 6px;
+            background: rgba(22, 23, 29, .88);
+            color: #f3f4f6;
+            font-size: .72rem;
+        }
+
+        .layout-aisle {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            border-top: 2px dashed rgba(255, 255, 255, .22);
+        }
+
+        .layout-aisle-label {
+            position: absolute;
+            top: calc(50% + 9px);
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,.6);
+            font-size: .65rem;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+        }
+
+        #gap-markers {
+            position: absolute;
+            inset: 0;
+        }
+
+        .gap-marker {
+            position: absolute;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: .35rem;
+            width: clamp(112px, 17vw, 150px);
+            min-height: 90px;
+            padding: .55rem;
+            transform: translate(-50%, -50%);
+            border: 2px solid #68727b;
+            border-radius: 10px;
+            background: rgba(30, 31, 38, .94);
+            color: var(--text-color);
+            text-align: center;
+            transition: .2s ease;
+        }
+
+        .gap-marker.fit {
+            border-color: #10b981;
+            box-shadow: 0 0 22px rgba(16, 185, 129, .25);
+        }
+
+        .gap-marker.no-fit {
+            opacity: .48;
+        }
+
+        .car-shape {
+            position: relative;
+            display: grid;
+            place-items: center;
+            width: 48px;
+            height: 34px;
+            border: 2px solid #e6edf3;
+            border-radius: 11px 11px 8px 8px;
+            background: #758591;
+            color: white;
+            font-size: .55rem;
+            font-weight: 700;
+        }
+
+        .gap-marker.fit .car-shape {
+            border-color: #b9ffe3;
+            background: #16866a;
+        }
+
+        .marker-label {
+            font-size: .7rem;
+            font-weight: 700;
+        }
+
+        .layout-note {
+            margin: .75rem 0 0;
+            color: var(--subtext-color);
+            font-size: .72rem;
+            line-height: 1.5;
+        }
+
+        .results-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: .75rem;
+        }
+
+        .result-card {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .9rem;
+            border: 1px solid rgba(16, 185, 129, .35);
+            border-radius: 8px;
+            background: rgba(16, 185, 129, .06);
+        }
+
+        .result-check {
+            display: grid;
+            place-items: center;
+            width: 30px;
+            height: 30px;
+            flex: 0 0 30px;
+            border-radius: 50%;
+            background: #10b981;
+            color: #071b15;
+            font-weight: 800;
+        }
+
+        .result-card strong,
+        .result-card span {
+            display: block;
+        }
+
+        .result-card strong {
+            color: var(--text-color);
+            font-size: .85rem;
+        }
+
+        .result-card span {
+            margin-top: .2rem;
+            color: var(--subtext-color);
+            font-size: .7rem;
+        }
+
+        .empty-state {
+            padding: 1rem;
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            color: var(--subtext-color);
+            font-size: .85rem;
+        }
+
+        .camera-details summary {
+            color: var(--text-color);
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .camera-placeholder {
+            display: grid;
+            place-items: center;
+            min-height: 150px;
+            margin-top: 1rem;
+            padding: 1.5rem;
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-color);
+            color: var(--subtext-color);
+            text-align: center;
+            font-size: .8rem;
+        }
+
+        .disclaimer {
+            margin: .75rem 0 0;
+            color: var(--subtext-color);
+            font-size: .68rem;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 650px) {
+            .hero {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .action-card {
+                grid-template-columns: 1fr;
+            }
+
+            .lot-layout {
+                min-height: 280px;
+            }
+        }
+    </style>
+
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#15161b">
+</head>
+s
+
+<body class="dark-theme">
+    <div class="dashboard">
+        <nav class="navbar">
+            <div class="nav-left">
+                <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44"
+                     viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="18" height="18" x="3" y="3" rx="2"/>
+                    <path d="M9 17V7h4a3 3 0 0 1 0 6H9"/>
+                </svg>
+
+                <div class="brand-text">
+                    <span class="nav-brand">ParkWise</span>
+                    <span class="nav-subtitle">SMART PARKING GUIDANCE</span>
+                </div>
+            </div>
+
+            <div class="nav-right">
+                <button class="theme-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+                    <div class="switch-thumb">
+                        <span id="icon-moon">☾</span>
+                        <span id="icon-sun" style="display:none;">☀</span>
+                    </div>
+                </button>
+            </div>
+        </nav>
+
+        <main class="page-content">
+            <section class="hero">
+                <div>
+                    <p class="eyebrow">BPSU MAIN CAMPUS · OCEA PARKING</p>
+                    <h1>Find a space for your car.</h1>
+                    <p>Choose your vehicle to see which candidate spaces meet the width rule.</p>
+                </div>
+                <span class="site-badge">Single study site</span>
+            </section>
+
+            <section class="panel action-card">
+                <div>
+                    <label for="vehicle-select">Choose your vehicle</label>
+                    <select id="vehicle-select">
+                        <option value="">Select a sample vehicle</option>
+                        <option value="176">Sample compact car</option>
+                        <option value="182">Sample sedan</option>
+                        <option value="190">Sample SUV</option>
+                    </select>
+                </div>
+                <button id="find-button" class="primary-button">Find a space</button>
+            </section>
+
+            <section id="summary" class="summary no-match" aria-live="polite">
+                <div id="summary-icon" class="summary-icon">?</div>
+                <div>
+                    <strong id="summary-title">Choose your vehicle</strong>
+                    <span id="summary-text">We’ll show candidate spaces that meet the width rule.</span>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="section-heading">
+                    <div>
+                        <h2 class="location-title">Parking area</h2>
+                        <p id="site-name">Loading site data…</p>
+                    </div>
+                    <span class="site-badge">Overhead view</span>
+                </div>
+
+                <div class="lot-layout">
+                    <div class="lot-label">Illustrative layout · candidate spaces</div>
+                    <div class="layout-aisle"></div>
+                    <div class="layout-aisle-label">Driving aisle</div>
+                    <div id="gap-markers"></div>
+                </div>
+
+                <p id="layout-note" class="layout-note">
+                    Loading parking spaces…
+                </p>
+            </section>
+
+            <section class="panel">
+                <div class="section-heading">
+                    <div>
+                        <h2 class="location-title">Spaces for your vehicle</h2>
+                        <p id="result-caption">Choose a vehicle to check available spaces.</p>
+                    </div>
+                </div>
+                <div id="results-list" class="results-list">
+                    <div class="empty-state">Your matching spaces will appear here.</div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <details class="camera-details">
+                    <summary>View camera information</summary>
+                    <div class="camera-placeholder">
+                        The annotated Raspberry Pi camera image will appear here when the camera
+                        analysis is connected.
+                    </div>
+                </details>
+                <p class="disclaimer">
+                    ParkWise checks vehicle width with the study clearance rule. It does not assess
+                    turning, maneuvering, or guarantee safe entry.
+                </p>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const CLEARANCE_CM = 50;
+        let gaps = [];
+
+        async function loadParkingData() {
+            const siteName = document.getElementById("site-name");
+            const layoutNote = document.getElementById("layout-note");
+
+            try {
+                const response = await fetch("/api/parking/latest");
+
+                if (!response.ok) {
+                    throw new Error("Could not load parking data.");
+                }
+
+                const data = await response.json();
+                gaps = Array.isArray(data.gaps) ? data.gaps : [];
+
+                siteName.textContent = data.site || "BPSU OCEA Parking Area";
+                renderSpaces();
+
+                const positioned = gaps.filter(gap =>
+                    Number.isFinite(Number(gap.xPercent)) &&
+                    Number.isFinite(Number(gap.yPercent))
+                ).length;
+
+                layoutNote.textContent = positioned
+                    ? "Green markers meet the selected vehicle’s width rule. Marker positions are sample coordinates."
+                    : "Gap positions are missing. Add xPercent and yPercent to the sample gaps in server.js.";
+            } catch (error) {
+                siteName.textContent = "Parking data unavailable";
+                layoutNote.textContent = "Start the ParkWise server, then refresh this page.";
+                document.getElementById("summary-title").textContent = "Parking data unavailable";
+                document.getElementById("summary-text").textContent = "Check that the server is running.";
+            }
+        }
+
+        function renderSpaces() {
+            const vehicleSelect = document.getElementById("vehicle-select");
+            const selectedWidth = Number(vehicleSelect.value);
+            const hasVehicle = vehicleSelect.value !== "";
+            const markerArea = document.getElementById("gap-markers");
+            const resultsList = document.getElementById("results-list");
+            const summary = document.getElementById("summary");
+            const matches = hasVehicle
+                ? gaps.filter(gap => Number(gap.widthCm) >= selectedWidth + CLEARANCE_CM)
+                : [];
+
+            markerArea.replaceChildren();
+            resultsList.replaceChildren();
+
+            gaps.forEach(gap => {
+                const x = Number(gap.xPercent);
+                const y = Number(gap.yPercent);
+
+                if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+
+                const fits = hasVehicle &&
+                    Number(gap.widthCm) >= selectedWidth + CLEARANCE_CM;
+
+                const marker = document.createElement("div");
+                marker.className = "gap-marker" +
+                    (fits ? " fit" : (hasVehicle ? " no-fit" : ""));
+                marker.style.left = x + "%";
+                marker.style.top = y + "%";
+
+                const car = document.createElement("span");
+                car.className = "car-shape";
+                car.textContent = "CAR";
+
+                const label = document.createElement("span");
+                label.className = "marker-label";
+                label.textContent = hasVehicle
+                    ? gap.id + (fits ? " · Fits" : "")
+                    : gap.id;
+
+                marker.append(car, label);
+                markerArea.appendChild(marker);
+            });
+
+            if (!hasVehicle) {
+                summary.className = "summary no-match";
+                document.getElementById("summary-icon").textContent = "?";
+                document.getElementById("summary-title").textContent = "Choose your vehicle";
+                document.getElementById("summary-text").textContent =
+                    "We’ll show candidate spaces that meet the width rule.";
+                document.getElementById("result-caption").textContent =
+                    "Choose a vehicle to check available spaces.";
+                resultsList.innerHTML =
+                    '<div class="empty-state">Select a vehicle, then choose “Find a space.”</div>';
+                return;
+            }
+
+            if (matches.length > 0) {
+                summary.className = "summary";
+                document.getElementById("summary-icon").textContent = "✓";
+                document.getElementById("summary-title").textContent =
+                    matches.length === 1
+                        ? "1 space fits your vehicle"
+                        : matches.length + " spaces fit your vehicle";
+                document.getElementById("summary-text").textContent =
+                    "Matching spaces are highlighted in green on the layout.";
+                document.getElementById("result-caption").textContent =
+                    "Candidate spaces for your selected vehicle.";
+                matches.forEach(gap => {
+                    const card = document.createElement("div");
+                    card.className = "result-card";
+
+                    const check = document.createElement("div");
+                    check.className = "result-check";
+                    check.textContent = "✓";
+
+                    const text = document.createElement("div");
+                    const title = document.createElement("strong");
+                    title.textContent = "Space " + gap.id;
+                    const subtitle = document.createElement("span");
+                    subtitle.textContent = "Fits by width";
+
+                    text.append(title, subtitle);
+                    card.append(check, text);
+                    resultsList.appendChild(card);
+                });
+            } else {
+                summary.className = "summary no-match";
+                document.getElementById("summary-icon").textContent = "–";
+                document.getElementById("summary-title").textContent =
+                    "No spaces fit this vehicle right now";
+                document.getElementById("summary-text").textContent =
+                    "Try another vehicle or check again later.";
+                document.getElementById("result-caption").textContent =
+                    "No matching candidate spaces found.";
+                resultsList.innerHTML =
+                    '<div class="empty-state">There are no matching spaces in the current sample data.</div>';
+            }
+        }
+
+        document.getElementById("find-button").addEventListener("click", renderSpaces);
+        document.getElementById("vehicle-select").addEventListener("change", renderSpaces);
+
+        function toggleTheme() {
+            document.body.classList.toggle("dark-theme");
+        }
+
+        loadParkingData();
+    </script>
+</body>
+</html>

@@ -1,0 +1,449 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+/* LIGHT theme (Based on your screenshot) */
+:root {
+    --bg-color: #f7f7f8;         /* Very light grey/off-white */
+    --text-color: #1a1b1e;       /* Almost black for high contrast */
+    --subtext-color: #71757d;    /* Muted grey */
+    --border-color: #e5e7eb;     /* Soft border */
+    --panel-bg: #ffffff;         /* Pure white panels */
+    --panel-shadow: rgba(0,0,0,0.03); 
+    --accent-color: #e06c75;     /* That signature soft coral/red! */
+}
+/* DARK theme (Based on your screenshot) */
+.dark-theme {
+    --bg-color: #16171d;         /* Deep rich charcoal/navy */
+    --text-color: #f3f4f6;       /* Crisp off-white */
+    --subtext-color: #9ca3af;    /* Light muted grey */
+    --border-color: #2b2d35;     /* Dark visible border */
+    --panel-bg: #1e1f26;         /* Slightly lighter than background */
+    --panel-shadow: rgba(0,0,0,0.2);
+    --accent-color: #e06c75;     /* Same coral red for contrast */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    /* Notice we are using the variables here now! */
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    transition: background-color 0.3s, color 0.3s; /* Smooth fade effect */
+}
+
+.dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+}
+
+/* --- THE NAVBAR --- */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.nav-left {
+    display: flex;
+    align-items: center; /* This forces the logo to center vertically with the text block */
+    gap: 0.75rem;
+}
+
+.nav-brand {
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1; /* Keeps the text tight */
+}
+
+/* Flexbox to stack the title and subtitle vertically */
+.brand-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.nav-subtitle {
+    color: var(--accent-color);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.nav-link {
+    color: var(--subtext-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.nav-link:hover {
+    color: var(--text-color);
+}
+
+.chevron {
+    font-size: 0.8rem;
+    opacity: 0.5;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 2rem; /* Creates perfect spacing between links and the slider */
+}
+
+
+/* The track (the pill shape) */
+.theme-switch {
+    width: 60px;
+    height: 32px;
+    background-color: var(--panel-bg);
+    border: 2px solid var(--accent-color);
+    border-radius: 30px;
+    cursor: pointer;
+    position: relative;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+}
+
+/* The sliding circle inside */
+.switch-thumb {
+    width: 24px;
+    height: 24px;
+    background-color: #111111; /* Always dark for the circle */
+    color: #e6edf3;            /* Light icon color */
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth slide */
+}
+
+/* When dark mode is active, slide the circle to the right! */
+body.dark-theme .switch-thumb {
+    transform: translateX(28px); 
+}
+
+
+.panel {
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px var(--panel-shadow);
+}
+
+.parking-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* Changed to 5 columns wide */
+    gap: 1.5rem; 
+}
+
+/* Individual Parking Spots */
+.spot {
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    background-color: var(--bg-color);
+    transition: all 0.3s;
+}
+
+.spot-name {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.spot-status {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Colors for Available vs Occupied */
+.available {
+    border-color: #10b981; /* Green */
+    color: #10b981;
+}
+
+.occupied {
+    border-color: var(--accent-color); /* Our Coral Red */
+    color: var(--accent-color);
+    background-color: rgba(224, 108, 117, 0.05); /* Slight red tint */
+}
+
+/* --- STATS BAR --- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 cards side-by-side */
+    gap: 1.5rem;
+    margin-bottom: 2rem; /* Pushes the parking grid down a bit */
+}
+
+.stat-card {
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px var(--panel-shadow);
+    text-align: center;
+    transition: all 0.3s;
+}
+
+/* Subtle hover effect so the cards lift up when you mouse over them */
+.stat-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-color);
+}
+
+.stat-label {
+    color: var(--subtext-color);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 3.5rem;
+    font-weight: 700;
+}
+
+.location-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+    
+    /* These three lines ensure the icon and text are perfectly centered next to each other */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* --- MAP & NAVIGATION PANEL --- */
+.map-panel {
+    display: flex;
+    height: 550px;
+    padding: 0; /* Remove padding so the map goes exactly to the edge */
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+#side {
+    width: 380px;
+    padding: 1.5rem;
+    overflow-y: auto;
+    border-right: 1px solid var(--border-color);
+    background: var(--panel-bg);
+}
+
+#map {
+    flex: 1;
+    z-index: 1; /* Keeps Leaflet controls under the nav bar */
+}
+
+input#q {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.nav-btn {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.nav-btn:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.nav-btn.warning:hover {
+    background-color: var(--accent-color);
+    color: #fff;
+}
+
+.map-hint {
+    font-size: 0.75rem;
+    color: var(--subtext-color);
+    margin-bottom: 1rem;
+}
+
+.item {
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 10px;
+    margin: 8px 0;
+    cursor: pointer;
+    background: var(--bg-color);
+    transition: all 0.2s;
+    font-size: 0.85rem;
+    color: var(--text-color);
+}
+
+.item:hover {
+    border-color: var(--accent-color);
+}
+
+.item.best {
+    border-color: var(--accent-color);
+    background: rgba(224, 108, 117, 0.05); /* Soft coral tint */
+}
+
+/* The GPS Dot */
+.me {
+    width: 18px;
+    height: 18px;
+    background: var(--accent-color); /* Our signature coral red! */
+    border: 3px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(0,0,0,.5);
+}
+
+#banner {
+    background: var(--accent-color);
+    color: #fff;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+#eta {
+    margin: 8px 0;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+#steps {
+    max-height: 150px;
+    overflow-y: auto;
+    font-size: 0.85rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+#steps div {
+    padding: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#steps .cur {
+    background: rgba(224, 108, 117, 0.1);
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+#msg {
+    color: var(--accent-color);
+    font-style: italic;
+    font-size: 0.85rem;
+    margin-top: 1rem;
+}
+
+.controls-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* =========================================
+   📱 MOBILE RESPONSIVENESS (PHONES & TABLETS)
+   ========================================= */
+@media (max-width: 768px) {
+    /* 1. Shrink padding on small screens */
+    .dashboard {
+        padding: 1.5rem 1rem;
+    }
+
+    /* 2. Stack the Navbar */
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+    
+    .nav-right {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .nav-link {
+        font-size: 0.8rem; /* Slightly smaller text for phone */
+    }
+
+    /* 3. Stack the Stats Grid (1 column instead of 3) */
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* 4. Map Panel: Map on top, Controls on bottom */
+    .map-panel {
+        flex-direction: column-reverse;
+        height: auto; 
+    }
+
+    #side {
+        width: 100%;
+        border-right: none;
+        border-top: 1px solid var(--border-color);
+        max-height: 400px; /* Lets the user scroll controls */
+    }
+
+    #map {
+        height: 350px; /* Fixed height for map on phone */
+        width: 100%;
+        flex: none; 
+    }
+
+    /* 5. Parking Grid: 2 columns instead of 5 */
+    .parking-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    /* Make the 5th spot stretch across the bottom row */
+    .parking-grid .spot:last-child {
+        grid-column: span 2;
+    }
+    
+    /* Slightly smaller spot text */
+    .spot {
+        padding: 1.5rem 0.5rem;
+    }
+    .spot-name {
+        font-size: 1.5rem;
+    }
+}
